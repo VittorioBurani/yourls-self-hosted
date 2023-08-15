@@ -1,0 +1,37 @@
+version: '3.9'
+
+services:
+  yourls:
+    image: vittburani/yourls
+    restart: always
+    pull_policy: always
+    environment:
+      - YOURLS_SITE=http://${HOST_DOMAIN:?err}
+      - YOURLS_USER=${ADMIN_USER:?err}
+      - YOURLS_PASS=${ADMIN_PASSWORD:?err}
+      - YOURLS_DB_USER=yourls
+      - YOURLS_FB_NAME=yourls
+      - YOURLS_DB_PASS=${DB_PASSWORD:?err}
+      - YOURLS_DB_HOST=db
+    depends_on:
+      - db
+    ports:
+      - ${HOST_IP:-127.0.0.1}:${HOST_PORT:-8000}:80
+    env_file:
+      - ./.env
+
+  db:
+    image: mariadb:10.11
+    restart: always
+    environment:
+      - MARIADB_ROOT_PASSWORD=${DB_ROOT_PASSWORD:?err}
+      - MARIADB_DATABASE=yourls
+      - MARIADB_USER=yourls
+      - MARIADB_PASSWORD=${DB_PASSWORD:?err}
+    volumes:
+      - maria_data:/var/lib/mysql
+    env_file:
+      - ./.env
+
+volumes:
+  maria_data:
